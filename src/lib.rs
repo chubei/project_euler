@@ -33,3 +33,102 @@ pub fn is_palindromic_chars(chars: Vec<u8>) -> bool {
     }
     true
 }
+
+use std::collections::HashMap;
+
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct PrimeFactorization {
+    pub map: HashMap<u64, u32>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PrimeFactor {
+    pub prime: u64,
+    pub power: u32,
+}
+
+impl PrimeFactorization {
+    pub fn add_prime_factor(&mut self, prime: u64, power: u32) {
+        use std::collections::hash_map::Entry;
+        match self.map.entry(prime) {
+            Entry::Occupied(mut entry) => *entry.get_mut() += power,
+            Entry::Vacant(entry) => {
+                entry.insert(power);
+            },
+        }
+    }
+
+    pub fn remove_prime_factor(&mut self, prime: u64, power: u32) {
+        let current = self.map.get_mut(&prime).unwrap();
+        *current = current.checked_sub(power).unwrap();
+    }
+
+    pub fn merge(&mut self, other: &PrimeFactorization) {
+        for (prime, power) in &other.map {
+            self.add_prime_factor(*prime, *power);
+        }
+    }
+
+    pub fn num_factors(&self) -> u32 {
+        self.map.iter().map(|(_, power)| power + 1).product()
+    }
+
+    pub fn value(&self) -> u64 {
+        self.map.iter().map(|(prime, power)| prime.pow(*power)).product()
+    }
+
+    pub fn into_vec(self) -> Vec<PrimeFactor> {
+        self.map.into_iter().map(|(prime, power)| PrimeFactor { prime, power }).collect()
+    }
+}
+
+pub fn prime_factorization(mut n: u64) -> PrimeFactorization {
+    let mut result = Default::default();
+
+    if n == 1 {
+        result
+    } else if n == 2 || n == 3 {
+        result.add_prime_factor(n, 1);
+        result
+    } else {
+        while n > 3 {
+            let mut reduced = false;
+            let upper_factor = (n as f64).sqrt().floor() as u64;
+            for i in 2..=upper_factor {
+                if n % i == 0 {
+                    result.add_prime_factor(i, 1);
+                    n /= i;
+                    reduced = true;
+                    break;
+                }
+            }
+            if !reduced {
+                // This is a prime.
+                result.add_prime_factor(n, 1);
+                n = 1;
+            }
+        }
+
+        if n == 3 {
+            result.add_prime_factor(3, 1);
+        } else if n == 2 {
+            result.add_prime_factor(2, 1);
+        }
+
+        result
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_primie_factorization() {
+        assert_eq!(prime_factorization(1).into_vec(), vec![]);
+        assert_eq!(prime_factorization(2).into_vec(), vec![PrimeFactor { prime: 2, power: 1 }]);
+        assert_eq!(prime_factorization(3).into_vec(), vec![PrimeFactor { prime: 3, power: 1 }]);
+        assert_eq!(prime_factorization(4).into_vec(), vec![PrimeFactor { prime: 2, power: 2 }]);
+        assert_eq!(prime_factorization(500).into_vec(), vec![PrimeFactor { prime: 5, power: 3 }, PrimeFactor { prime: 2, power: 2 }]);
+    }
+}
