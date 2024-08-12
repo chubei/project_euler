@@ -129,6 +129,10 @@ mod tests {
         assert_eq!(prime_factorization(2).into_vec(), vec![PrimeFactor { prime: 2, power: 1 }]);
         assert_eq!(prime_factorization(3).into_vec(), vec![PrimeFactor { prime: 3, power: 1 }]);
         assert_eq!(prime_factorization(4).into_vec(), vec![PrimeFactor { prime: 2, power: 2 }]);
-        assert_eq!(prime_factorization(500).into_vec(), vec![PrimeFactor { prime: 5, power: 3 }, PrimeFactor { prime: 2, power: 2 }]);
+        let mut prime_factors_500 = prime_factorization(500).into_vec();
+        // A prime factor + its multiplicity doesn't have a clear ordering, but let's choose one,
+        // as otherwise the test output is nondeterministic due to hashing.
+        prime_factors_500.sort_by(|fa, fb| fa.prime.cmp(&fb.prime));
+        assert_eq!(prime_factors_500, vec![PrimeFactor { prime: 2, power: 2 }, PrimeFactor { prime: 5, power: 3 }]);
     }
 }
