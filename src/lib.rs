@@ -54,7 +54,7 @@ impl PrimeFactorization {
             Entry::Occupied(mut entry) => *entry.get_mut() += power,
             Entry::Vacant(entry) => {
                 entry.insert(power);
-            },
+            }
         }
     }
 
@@ -70,15 +70,21 @@ impl PrimeFactorization {
     }
 
     pub fn num_factors(&self) -> u32 {
-        self.map.iter().map(|(_, power)| power + 1).product()
+        self.map.values().map(|power| power + 1).product()
     }
 
     pub fn value(&self) -> u64 {
-        self.map.iter().map(|(prime, power)| prime.pow(*power)).product()
+        self.map
+            .iter()
+            .map(|(prime, power)| prime.pow(*power))
+            .product()
     }
 
     pub fn into_vec(self) -> Vec<PrimeFactor> {
-        self.map.into_iter().map(|(prime, power)| PrimeFactor { prime, power }).collect()
+        self.map
+            .into_iter()
+            .map(|(prime, power)| PrimeFactor { prime, power })
+            .collect()
     }
 }
 
@@ -119,6 +125,26 @@ pub fn prime_factorization(mut n: u64) -> PrimeFactorization {
     }
 }
 
+pub fn sieve(n: usize) -> Vec<usize> {
+    let mut is_prime = vec![true; n + 1];
+    is_prime[0] = false;
+    is_prime[1] = false;
+    for i in 2..=(n as f64).sqrt().ceil() as usize {
+        let mut sieved = i * 2;
+        while sieved <= n {
+            is_prime[sieved] = false;
+            sieved += i;
+        }
+    }
+    is_prime
+        .into_iter()
+        .enumerate()
+        .filter_map(|(i, is_prime)| if is_prime { Some(i) } else { None })
+        .collect()
+}
+
+pub mod grid;
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -126,13 +152,33 @@ mod tests {
     #[test]
     fn test_primie_factorization() {
         assert_eq!(prime_factorization(1).into_vec(), vec![]);
-        assert_eq!(prime_factorization(2).into_vec(), vec![PrimeFactor { prime: 2, power: 1 }]);
-        assert_eq!(prime_factorization(3).into_vec(), vec![PrimeFactor { prime: 3, power: 1 }]);
-        assert_eq!(prime_factorization(4).into_vec(), vec![PrimeFactor { prime: 2, power: 2 }]);
+        assert_eq!(
+            prime_factorization(2).into_vec(),
+            vec![PrimeFactor { prime: 2, power: 1 }]
+        );
+        assert_eq!(
+            prime_factorization(3).into_vec(),
+            vec![PrimeFactor { prime: 3, power: 1 }]
+        );
+        assert_eq!(
+            prime_factorization(4).into_vec(),
+            vec![PrimeFactor { prime: 2, power: 2 }]
+        );
         let mut prime_factors_500 = prime_factorization(500).into_vec();
         // A prime factor + its multiplicity doesn't have a clear ordering, but let's choose one,
         // as otherwise the test output is nondeterministic due to hashing.
         prime_factors_500.sort_by(|fa, fb| fa.prime.cmp(&fb.prime));
-        assert_eq!(prime_factors_500, vec![PrimeFactor { prime: 2, power: 2 }, PrimeFactor { prime: 5, power: 3 }]);
+        assert_eq!(
+            prime_factors_500,
+            vec![
+                PrimeFactor { prime: 2, power: 2 },
+                PrimeFactor { prime: 5, power: 3 }
+            ]
+        );
+    }
+
+    #[test]
+    fn test_sieve() {
+        assert_eq!(sieve(11), [2, 3, 5, 7, 11])
     }
 }
