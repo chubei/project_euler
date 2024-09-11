@@ -144,6 +144,7 @@ pub fn sieve(n: usize) -> Vec<usize> {
 }
 
 pub mod grid;
+pub mod path_sum;
 
 #[cfg(test)]
 mod tests {
