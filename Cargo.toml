@@ -8,5 +8,8 @@ edition = "2021"
 [dependencies]
 daggy = "0.8.0"
 either = "1.13.0"
+itertools = "0.13.0"
 num-bigint = "0.4.6"
 petgraph = "0.6.5"
+reqwest = "0.12.7"
+tokio = { version = "1.40.0", features = ["full"] }

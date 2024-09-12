@@ -143,6 +143,10 @@ pub fn sieve(n: usize) -> Vec<usize> {
         .collect()
 }
 
+pub fn sum_of_proper_divisors(n: u32) -> u32 {
+    (1..n).filter(|i| n % i == 0).sum()
+}
+
 pub mod grid;
 pub mod path_sum;
 
